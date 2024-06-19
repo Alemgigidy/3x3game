@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lichtmuster-Spiel</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .level-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+        }
+        .grid button {
+            width: 100px;
+            height: 100px;
+            font-size: 24px;
+            border: 2px solid #333;
+            color: white;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .grid #btn-0 { background-color: #ff6666; }
+        .grid #btn-1 { background-color: #ff9966; }
+        .grid #btn-2 { background-color: #ffff66; }
+        .grid #btn-3 { background-color: #66ff66; }
+        .grid #btn-4 { background-color: #66ffff; }
+        .grid #btn-5 { background-color: #6666ff; }
+        .grid #btn-6 { background-color: #9966ff; }
+        .grid #btn-7 { background-color: #ff66ff; }
+        .grid #btn-8 { background-color: #ff6699; }
+        .active {
+            transform: scale(1.1);
+            filter: brightness(200%);
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+        #retry {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="level-display">Level: <span id="level"></span></div>
+    <div class="grid">
+        <button id="btn-0" onclick="handleButtonClick(0)"></button>
+        <button id="btn-1" onclick="handleButtonClick(1)"></button>
+        <button id="btn-2" onclick="handleButtonClick(2)"></button>
+        <button id="btn-3" onclick="handleButtonClick(3)"></button>
+        <button id="btn-4" onclick="handleButtonClick(4)"></button>
+        <button id="btn-5" onclick="handleButtonClick(5)"></button>
+        <button id="btn-6" onclick="handleButtonClick(6)"></button>
+        <button id="btn-7" onclick="handleButtonClick(7)"></button>
+        <button id="btn-8" onclick="handleButtonClick(8)"></button>
+    </div>
+    <div id="message"></div>
+    <button id="retry" onclick="startGame()">Erneut versuchen</button>
+
+    <script>
+        const buttons = document.querySelectorAll('.grid button');
+        let sequence = [];
+        let userSequence = [];
+        let level = 1;
+        const maxLevel = 20;
+        const maxTakesPerLevel = level => Math.min(level + 2, 10);
+
+        function startGame() {
+            document.getElementById('message').textContent = '';
+            document.getElementById('retry').style.display = 'none';
+            sequence = [];
+            userSequence = [];
+            level = 1;
+            document.getElementById('level').textContent = level;
+            nextLevel();
+        }
+
+        function nextLevel() {
+            userSequence = [];
+            sequence = [];
+            for (let i = 0; i < maxTakesPerLevel(level); i++) {
+                sequence.push(Math.floor(Math.random() * 9));
+            }
+            showSequence();
+        }
+
+        function showSequence() {
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < sequence.length) {
+                    const button = buttons[sequence[index]];
+                    button.classList.add('active');
+                    setTimeout(() => {
+                        button.classList.remove('active');
+                    }, 500);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 700);
+        }
+
+        function handleButtonClick(index) {
+            userSequence.push(index);
+            const button = buttons[index];
+            button.classList.add('active');
+            setTimeout(() => {
+                button.classList.remove('active');
+            }, 300);
+            checkSequence();
+        }
+
+        function checkSequence() {
+            const currentLevel = userSequence.length;
+            if (userSequence[currentLevel - 1] !== sequence[currentLevel - 1]) {
+                document.getElementById('message').textContent = `Verloren! Du hast Level ${level} erreicht.`;
+                document.getElementById('retry').style.display = 'block';
+                return;
+            }
+            if (currentLevel === sequence.length) {
+                if (level === maxLevel) {
+                    document.getElementById('message').textContent = 'Gewonnen! Du hast das maximale Level erreicht!';
+                    document.getElementById('retry').style.display = 'block';
+                } else {
+                    level++;
+                    document.getElementById('level').textContent = level;
+                    setTimeout(nextLevel, 1000);
+                }
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
